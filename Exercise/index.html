@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contour CT Scan Viz</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+<body>
+    <h3>Added a D3 transition so the colors appear after 5 seconds</h3>
+    <svg viewbox="0 0 1200 1300"></svg>
+
+    <script>
+        const ct_data = "data/Data_CT.csv"
+        let svg = d3.select("svg");
+        const path = d3.geoPath();
+
+        // function to plot the contour viz
+        function contourPlot(data, threshold, min, max) {
+
+            d3.csv(data).then(data => {
+                // data dimensions
+                let m = 512,
+                    n = 512;
+
+                // Step 2 convert data into 1D list
+                let data_list = [];
+                data.forEach(function(d) {
+                    data_list.push(+d[0])
+                });
+                console.log(data_list)
+
+                // get extent if case min and max is not provided
+                if (min == undefined || max == undefined) {
+                    let range = d3.extent(data_list, d => d)
+                    min = range[0]
+                    max = range[1]
+                    console.log(range)
+                }
+                console.log(threshold)
+                    // create a contour
+                let contour = d3.contours()
+                    .size([m, n])
+                    .thresholds(d3.range(min, max, threshold))(data_list);
+
+                console.log(contour)
+
+                // let colorScale = d3.scaleLinear()
+                //     .domain(d3.range(range[0], range[1], threshold))
+                //     .range(["#FFFFFF", "#0d1a50", "#3e5eba",
+                //         "#abdda4", "#ffffbf", "#fdae61", "#d7191c"
+                //     ])
+                // .range(["#FFFFFF", "#d7191c"])
+                // .interpolate(d3.interpolateHcl);
+
+
+                let colorScale = d3.scaleLinear()
+                    .domain(d3.range(min, max,
+                        parseInt(Math.abs(max - min) / 10)))
+                    .range([
+                        "#ffffff", "#ffffff", "#2d3f8c", "#3e5eba", "#2b83ba",
+                        "#abdda4", "#ffffbf", "#fdae61", "#d7191c"
+                    ])
+                    .interpolate(d3.interpolateHcl);
+
+
+                svg.selectAll("*").remove();
+
+                paths = svg.selectAll("path")
+                    .data(contour)
+                    .enter()
+                    .append('path')
+                    .attr('d', path)
+                    .attr('stroke-width', '0.1px')
+                    .attr('stroke-linejoin', 'round')
+                    .attr('fill', 'none')
+                    .attr("stroke", "black")
+
+                // added a transition to postpone the colors
+                paths.transition()
+                    .delay(5000)
+                    .duration(2000)
+                    .attr('fill', d => {
+                        // console.log(d.value)
+                        // console.log(colorScale(d.value))
+                        return colorScale(d.value)
+                    })
+            })
+        }
+
+        contourPlot(ct_data, threshold = 150)
+    </script>
+</body>
+
+</html>
