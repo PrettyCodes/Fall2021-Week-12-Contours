@@ -48,15 +48,6 @@
 
                 console.log(contour)
 
-                // let colorScale = d3.scaleLinear()
-                //     .domain(d3.range(range[0], range[1], threshold))
-                //     .range(["#FFFFFF", "#0d1a50", "#3e5eba",
-                //         "#abdda4", "#ffffbf", "#fdae61", "#d7191c"
-                //     ])
-                // .range(["#FFFFFF", "#d7191c"])
-                // .interpolate(d3.interpolateHcl);
-
-
                 let colorScale = d3.scaleLinear()
                     .domain(d3.range(min, max,
                         parseInt(Math.abs(max - min) / 10)))
